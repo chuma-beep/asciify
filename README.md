@@ -1,6 +1,30 @@
 # asciify
 
+[![CI](https://github.com/chuma-beep/asciify/actions/workflows/ci.yml/badge.svg)](https://github.com/chuma-beep/asciify/actions/workflows/ci.yml)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/chuma-beep/asciify)
+
 A fast, font-aware image-to-ASCII converter written in Go.
+
+## Test it online
+
+The repo includes a Go dev container, so you can run it in a browser without
+installing anything locally:
+
+1. Open [GitHub Codespaces](https://codespaces.new/chuma-beep/asciify).
+2. Wait for the container and `go test ./...` to finish.
+3. In the terminal, run the bundled fixtures:
+
+```sh
+go run ./cmd/asciify testdata/gradient.png --cols 80 --mode ramp
+go run ./cmd/asciify testdata/lineart.png --cols 80 --mode shape --invert
+go run ./cmd/asciify testdata/portrait.png --cols 64 --mode shape
+go run ./cmd/asciify testdata/photo.png --cols 100 --mode shape --color truecolor
+go build -o asciify ./cmd/asciify
+./asciify --help
+```
+
+GitHub Actions also runs formatting, vet, tests, the race detector, and a release
+build on every push.
 
 `asciify` does more than pick a character from a brightness ramp. It converts
 the image to linear light, area-averages it into character cells, normalizes the
