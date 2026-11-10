@@ -28,6 +28,8 @@ jobs:
         run: go test -race ./...
       - name: Build
         run: go build -trimpath -o asciify ./cmd/asciify
+      - name: Build browser demo
+        run: ./web/build.sh
       - uses: actions/upload-artifact@v4
         with:
           name: asciify-linux-amd64

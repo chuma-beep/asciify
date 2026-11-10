@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Turn an image into ASCII art in the browser with asciify. No upload: the image is converted locally by WebAssembly."
+    />
+    <title>asciify — browser demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="https://github.com/chuma-beep/asciify">
+        asciify <span>/ browser demo</span>
+      </a>
+      <div class="topbar-actions">
+        <span id="status" class="status" role="status">loading wasm…</span>
+        <a class="btn" href="https://github.com/chuma-beep/asciify">GitHub</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel">
+        <section class="group">
+          <h2>Image</h2>
+          <label class="drop" id="drop">
+            <input
+              type="file"
+              id="file"
+              accept="image/png,image/jpeg,image/gif"
+              hidden
+            />
+            <span id="dropText">Drop an image or <u>browse</u></span>
+          </label>
+          <div class="samples" id="samples"></div>
+        </section>
+
+        <section class="group">
+          <h2>Output</h2>
+          <label class="field">
+            <span>Columns</span>
+            <input type="number" id="cols" min="4" max="500" value="100" />
+          </label>
+          <label class="field">
+            <span>Mode</span>
+            <select id="mode">
+              <option value="shape" selected>shape</option>
+              <option value="ramp">ramp</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Color</span>
+            <select id="color">
+              <option value="none" selected>none</option>
+              <option value="ansi256">ansi256</option>
+              <option value="truecolor">truecolor</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Cell aspect</span>
+            <input
+              type="number"
+              id="cellAspect"
+              min="0.5"
+              max="5"
+              step="0.1"
+              value="2"
+            />
+          </label>
+          <label class="field">
+            <span>Charset</span>
+            <input type="text" id="charset" spellcheck="false" />
+          </label>
+        </section>
+
+        <section class="group">
+          <h2>Tone</h2>
+          <label class="field">
+            <span>Clip low</span>
+            <input type="number" id="clipLow" min="0" max="1" step="0.01" value="0.02" />
+          </label>
+          <label class="field">
+            <span>Clip high</span>
+            <input type="number" id="clipHigh" min="0" max="1" step="0.01" value="0.98" />
+          </label>
+          <label class="check">
+            <input type="checkbox" id="invert" />
+            <span>Invert</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="edges" />
+            <span>Edges</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="localContrast" />
+            <span>Local contrast</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="dither" />
+            <span>Dither</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="halfblock" />
+            <span>Halfblock</span>
+          </label>
+        </section>
+
+        <section class="group">
+          <h2>Font</h2>
+          <label class="drop small">
+            <input type="file" id="font" accept=".ttf,.otf" hidden />
+            <span id="fontName">Go Mono (embedded)</span>
+          </label>
+        </section>
+
+        <section class="group">
+          <h2>Export</h2>
+          <div class="buttons">
+            <button class="btn" id="copy" type="button">Copy text</button>
+            <button class="btn" id="downloadTxt" type="button">Download .txt</button>
+            <button class="btn" id="downloadPng" type="button">Download .png</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <pre id="output" class="output" tabindex="0"><code id="outputCode">Choose an image to begin.</code></pre>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

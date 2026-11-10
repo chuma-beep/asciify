@@ -5,6 +5,24 @@
 
 A fast, font-aware image-to-ASCII converter written in Go.
 
+## Browser demo
+
+Try it online at <https://chuma-beep.github.io/asciify/>.
+
+The demo runs entirely in your browser. The image is converted by a WebAssembly
+build of the same pipeline, and nothing is uploaded.
+
+Run it locally:
+
+```sh
+./web/build.sh
+python3 -m http.server 8000 --directory web/dist
+# open http://127.0.0.1:8000/
+```
+
+The demo supports PNG, JPEG, and GIF input, all CLI flags except `--out`, a
+custom monospace font upload, plain-text copy, and `.txt` / `.png` export.
+
 ## Test it online
 
 The repo includes a Go dev container, so you can run it in a browser without
@@ -212,9 +230,12 @@ the shape-matching benchmark.
 
 ```text
 cmd/asciify          CLI and flag parsing
+cmd/asciify-wasm     GOOS=js GOARCH=wasm entrypoint for the browser demo
+internal/convert     shared conversion core used by the CLI and the browser
 internal/pipeline    decode, linear light, resampling, contrast, edges
 internal/glyphs      embedded font, glyph rasterization, shape matching
 internal/render      ramp/shape/halfblock rendering and output formats
+web                  browser demo source and build script
 testdata             generated fixtures and golden image
 out                  checked-in sample output
 ```

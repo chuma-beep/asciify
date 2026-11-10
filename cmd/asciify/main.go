@@ -11,14 +11,9 @@ import (
 	"strconv"
 	"strings"
 
+	"asciify/internal/convert"
 	"asciify/internal/glyphs"
-	"asciify/internal/pipeline"
 	"asciify/internal/render"
-)
-
-const (
-	defaultCellW = 8
-	defaultCellH = 16
 )
 
 func main() {
@@ -59,92 +54,48 @@ func run(args []string) error {
 		fs.Usage()
 		return errors.New("expected exactly one input image")
 	}
-	if *mode != "ramp" && *mode != "shape" {
-		return fmt.Errorf("unknown mode %q: use ramp or shape", *mode)
+
+	opts := convert.Options{
+		Cols:          *cols,
+		Mode:          *mode,
+		ColorMode:     *colorMode,
+		Charset:       *charset,
+		CellAspect:    *cellAspect,
+		ClipLow:       *clipLow,
+		ClipHigh:      *clipHigh,
+		Edges:         *edges,
+		LocalContrast: *localContrast,
+		Dither:        *dither,
+		Invert:        *invert,
+		Halfblock:     *halfblock,
 	}
-	if *colorMode != "none" && *colorMode != "ansi256" && *colorMode != "truecolor" {
-		return fmt.Errorf("unknown colour mode %q: use none, ansi256, or truecolor", *colorMode)
+	if opts.Cols <= 0 {
+		opts.Cols = outputColumns(*outPath == "")
 	}
-	if *cellAspect <= 0 {
-		return errors.New("--cell-aspect must be positive")
-	}
-	if *clipLow < 0 || *clipHigh > 1 || *clipLow >= *clipHigh {
-		return errors.New("--clip-low and --clip-high must satisfy 0 <= low < high <= 1")
+	if err := opts.Validate(); err != nil {
+		return err
 	}
 
-	fontData := glyphs.DefaultFont()
 	if *fontPath != "" {
 		data, err := os.ReadFile(*fontPath)
 		if err != nil {
 			return fmt.Errorf("read font: %w", err)
 		}
-		fontData = data
+		opts.FontData = data
 	}
 
-	file, err := os.Open(fs.Arg(0))
+	input, err := os.ReadFile(fs.Arg(0))
 	if err != nil {
-		return fmt.Errorf("open input: %w", err)
+		return fmt.Errorf("read input: %w", err)
 	}
-	defer file.Close()
-	img, err := pipeline.Decode(file)
+
+	if opts.Cols <= 0 {
+		opts.Cols = outputColumns(*outPath == "")
+	}
+	art, err := convert.Convert(input, opts)
 	if err != nil {
 		return err
 	}
-
-	columns := *cols
-	if columns <= 0 {
-		columns = outputColumns(*outPath == "")
-	}
-	if columns < 4 {
-		return errors.New("--cols must be at least 4")
-	}
-
-	rows := pipeline.CellRows(img.Width, img.Height, columns, *cellAspect)
-	sampleRows := rows
-	if *halfblock {
-		sampleRows = rows * 2
-	}
-	grid := pipeline.Resample(img, columns, sampleRows)
-
-	low, high := pipeline.ClipPercentiles(grid, *clipLow, *clipHigh)
-	pipeline.Normalize(grid, low, high)
-
-	var tiles *pipeline.Grid
-	var set *glyphs.Set
-	if !*halfblock {
-		set, err = glyphs.Load(fontData, *charset, defaultCellW, defaultCellH)
-		if err != nil {
-			return err
-		}
-		if *mode == "shape" {
-			tiles = pipeline.Resample(img, columns*defaultCellW, sampleRows*defaultCellH)
-			pipeline.NormalizeValues(tiles.L, low, high)
-		}
-	}
-
-	if *localContrast {
-		pipeline.LocalContrast(grid, 3, 1.8)
-		if tiles != nil {
-			pipeline.LocalContrast(tiles, 3, 1.8)
-		}
-	}
-	if *edges {
-		pipeline.Unsharp(grid, 1.2)
-		if tiles != nil {
-			pipeline.Unsharp(tiles, 1.2)
-		}
-	}
-
-	var art *render.Art
-	switch {
-	case *halfblock:
-		art = render.Halfblock(grid, *colorMode != "none")
-	case *mode == "shape":
-		art = render.Shape(grid, tiles, set, *invert)
-	default:
-		art = render.Ramp(grid, set, *dither, *invert)
-	}
-	art.Monochrome = *colorMode == "none"
 
 	if *outPath == "" {
 		return render.WriteTerminal(os.Stdout, art, *colorMode)
@@ -163,7 +114,7 @@ func run(args []string) error {
 			return fmt.Errorf("create output: %w", err)
 		}
 		defer out.Close()
-		return render.WritePNG(out, art, fontData, defaultCellW, defaultCellH)
+		return render.WritePNG(out, art, opts.ResolvedFont(), convert.DefaultCellW, convert.DefaultCellH)
 	default:
 		return fmt.Errorf("unsupported output %q: use .txt or .png", *outPath)
 	}
@@ -184,9 +135,6 @@ func outputColumns(terminal bool) int {
 				}
 			}
 		}
-	}
-	if terminal {
-		return 120
 	}
 	return 120
 }
