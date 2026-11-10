@@ -34,11 +34,25 @@
             />
             <span id="dropText">Drop an image or <u>browse</u></span>
           </label>
+          <div class="source">
+            <img id="preview" alt="" hidden />
+            <div class="source-meta">
+              <strong id="sourceName">No image</strong>
+              <span id="sourceSize">—</span>
+            </div>
+          </div>
           <div class="samples" id="samples"></div>
         </section>
 
         <section class="group">
           <h2>Output</h2>
+          <div class="samples" id="presets">
+            <button class="chip" data-preset="lagoon" type="button">Lagoon</button>
+            <button class="chip" data-preset="portrait" type="button">Portrait</button>
+            <button class="chip" data-preset="photo" type="button">Photo</button>
+            <button class="chip" data-preset="lineart" type="button">Line art</button>
+            <button class="chip" data-preset="blocks" type="button">Blocks</button>
+          </div>
           <label class="field">
             <span>Columns</span>
             <input type="number" id="cols" min="4" max="500" value="100" />
@@ -47,8 +61,17 @@
             <span>Mode</span>
             <select id="mode">
               <option value="shape" selected>shape</option>
+              <option value="paint">paint</option>
               <option value="ramp">ramp</option>
             </select>
+          </label>
+          <label class="field">
+            <span>Texture</span>
+            <input type="range" id="texture" min="0" max="1" step="0.05" value="0.6" />
+          </label>
+          <label class="field">
+            <span>Seed</span>
+            <input type="number" id="seed" min="0" max="9999" step="1" value="1" />
           </label>
           <label class="field">
             <span>Color</span>
@@ -56,6 +79,20 @@
               <option value="none" selected>none</option>
               <option value="ansi256">ansi256</option>
               <option value="truecolor">truecolor</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Palette</span>
+            <select id="palette">
+              <option value="none" selected>none</option>
+              <option value="abyss">abyss</option>
+              <option value="neon">neon</option>
+              <option value="mono">mono</option>
+              <option value="paper">paper</option>
+              <option value="amber">amber</option>
+              <option value="blueprint">blueprint</option>
+              <option value="newsprint">newsprint</option>
+              <option value="terminal">terminal</option>
             </select>
           </label>
           <label class="field">
@@ -84,6 +121,18 @@
           <label class="field">
             <span>Clip high</span>
             <input type="number" id="clipHigh" min="0" max="1" step="0.01" value="0.98" />
+          </label>
+          <label class="field">
+            <span>Gamma</span>
+            <input type="number" id="gamma" min="0.2" max="4" step="0.05" value="1" />
+          </label>
+          <label class="field">
+            <span>Background</span>
+            <select id="background">
+              <option value="auto" selected>auto</option>
+              <option value="black">black</option>
+              <option value="white">white</option>
+            </select>
           </label>
           <label class="check">
             <input type="checkbox" id="invert" />
@@ -116,10 +165,19 @@
         </section>
 
         <section class="group">
+          <h2>View</h2>
+          <label class="field">
+            <span>Font size</span>
+            <input type="range" id="fontSize" min="8" max="20" step="1" value="12" />
+          </label>
+        </section>
+
+        <section class="group">
           <h2>Export</h2>
           <div class="buttons">
             <button class="btn" id="copy" type="button">Copy text</button>
             <button class="btn" id="downloadTxt" type="button">Download .txt</button>
+            <button class="btn" id="downloadHtml" type="button">Download .html</button>
             <button class="btn" id="downloadPng" type="button">Download .png</button>
           </div>
         </section>

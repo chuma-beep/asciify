@@ -7,18 +7,24 @@ package pipeline
 import "math"
 
 // LinearImage is an sRGB image converted to linear light, with alpha composited
-// over black. R, G, B and L all have len == Width*Height.
+// over the chosen background. R, G, B, L and A all have len == Width*Height.
+// A is the original opacity before compositing; opaque images have A == 1.
 type LinearImage struct {
 	Width, Height int
-	R, G, B, L    []float32
+	R, G, B, L, A []float32
+	// Background is the resolved composite background: "black" or "white".
+	Background string
 }
 
 // Grid is a rectangular sample grid. L is normalized luminance in [0,1].
-// R, G and B are the matching average linear-light colours.
+// R, G and B are the matching average linear-light colours. A is average
+// opacity; it is nil for grids built without alpha data, which means fully
+// opaque.
 type Grid struct {
 	Cols, Rows int
 	L          []float32
 	R, G, B    []float32
+	A          []float32
 }
 
 // At returns the luminance at x, y.

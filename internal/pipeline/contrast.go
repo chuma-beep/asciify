@@ -1,5 +1,7 @@
 package pipeline
 
+import "math"
+
 // ClipPercentiles finds the low/high luminance values at the requested
 // percentiles. Percentiles are clamped to [0,1] and must be increasing.
 func ClipPercentiles(grid *Grid, lowP, highP float64) (float32, float32) {
@@ -65,6 +67,23 @@ func NormalizeValues(values []float32, low, high float32) {
 	rangeV := high - low
 	for i, v := range values {
 		values[i] = clamp01((v - low) / rangeV)
+	}
+}
+
+// ApplyGamma maps normalized values through v^(1/gamma). Values above 1 lift
+// midtones; values below 1 deepen them. Gamma 1 is a no-op.
+func ApplyGamma(grid *Grid, gamma float64) {
+	ApplyGammaValues(grid.L, gamma)
+}
+
+// ApplyGammaValues applies the same gamma curve to a flat luminance slice.
+func ApplyGammaValues(values []float32, gamma float64) {
+	if gamma <= 0 || gamma == 1 {
+		return
+	}
+	exponent := 1 / gamma
+	for i, v := range values {
+		values[i] = clamp01(float32(math.Pow(float64(clamp01(v)), exponent)))
 	}
 }
 

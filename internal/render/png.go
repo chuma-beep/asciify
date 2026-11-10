@@ -30,7 +30,11 @@ func WritePNG(w io.Writer, art *Art, fontData []byte, cellW, cellH int) error {
 	defer face.Close()
 
 	dst := image.NewRGBA(image.Rect(0, 0, art.Cols*cellW, art.Rows*cellH))
-	draw.Draw(dst, dst.Bounds(), image.NewUniform(color.RGBA{0, 0, 0, 255}), image.Point{}, draw.Src)
+	background := color.RGBA{0, 0, 0, 255}
+	if art.FillMask != nil {
+		background = color.RGBA{art.Base.R, art.Base.G, art.Base.B, 255}
+	}
+	draw.Draw(dst, dst.Bounds(), image.NewUniform(background), image.Point{}, draw.Src)
 	metrics := face.Metrics()
 	baseline := (cellH - (metrics.Ascent.Ceil() + metrics.Descent.Ceil())) / 2
 	baseline += metrics.Ascent.Ceil()
@@ -39,8 +43,13 @@ func WritePNG(w io.Writer, art *Art, fontData []byte, cellW, cellH int) error {
 		for x := 0; x < art.Cols; x++ {
 			i := y*art.Cols + x
 			fg := color.RGBA{235, 235, 235, 255}
-			if !art.Monochrome && art.FG[i] != (Color{}) {
+			if (!art.Monochrome || art.FillMask != nil) && art.FG[i] != (Color{}) {
 				fg = color.RGBA{art.FG[i].R, art.FG[i].G, art.FG[i].B, 255}
+			}
+			if art.FillMask != nil && art.FillMask[i] {
+				bg := art.BG[i]
+				rect := image.Rect(x*cellW, y*cellH, (x+1)*cellW, (y+1)*cellH)
+				draw.Draw(dst, rect, image.NewUniform(color.RGBA{bg.R, bg.G, bg.B, 255}), image.Point{}, draw.Src)
 			}
 			if art.Halfblock {
 				bg := art.BG[i]

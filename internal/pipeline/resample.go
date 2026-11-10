@@ -38,10 +38,15 @@ func Resample(img *LinearImage, cols, rows int) *Grid {
 		R: make([]float32, cols*rows),
 		G: make([]float32, cols*rows),
 		B: make([]float32, cols*rows),
+		A: make([]float32, cols*rows),
 	}
 	if img.Width <= 0 || img.Height <= 0 {
 		return grid
 	}
+	for i := range grid.A {
+		grid.A[i] = 1
+	}
+	hasAlpha := len(img.A) == len(img.R)
 
 	xSpans := make([]span, cols)
 	for ox := 0; ox < cols; ox++ {
@@ -67,7 +72,7 @@ func Resample(img *LinearImage, cols, rows int) *Grid {
 				for ox := 0; ox < cols; ox++ {
 					x0 := float64(ox) * float64(img.Width) / float64(cols)
 					x1 := float64(ox+1) * float64(img.Width) / float64(cols)
-					var sr, sg, sb, area float64
+					var sr, sg, sb, sa, area float64
 					for sy := syStart; sy < syEnd; sy++ {
 						wy := math.Min(y1, float64(sy+1)) - math.Max(y0, float64(sy))
 						if wy <= 0 {
@@ -84,6 +89,9 @@ func Resample(img *LinearImage, cols, rows int) *Grid {
 							sr += float64(img.R[i]) * weight
 							sg += float64(img.G[i]) * weight
 							sb += float64(img.B[i]) * weight
+							if hasAlpha {
+								sa += float64(img.A[i]) * weight
+							}
 							area += weight
 						}
 					}
@@ -98,6 +106,9 @@ func Resample(img *LinearImage, cols, rows int) *Grid {
 					grid.G[i] = g
 					grid.B[i] = b
 					grid.L[i] = Luminance(r, g, b)
+					if hasAlpha {
+						grid.A[i] = float32(sa / area)
+					}
 				}
 			}
 		}(w)

@@ -33,19 +33,24 @@ func run(args []string) error {
 	}
 
 	cols := fs.Int("cols", 0, "output columns; 0 uses the terminal width or 120")
-	mode := fs.String("mode", "shape", "rendering mode: ramp or shape")
+	mode := fs.String("mode", "shape", "rendering mode: ramp, shape, or paint")
 	colorMode := fs.String("color", "none", "terminal colour: none, ansi256, or truecolor")
 	charset := fs.String("charset", glyphs.DefaultCharset, "candidate glyphs")
 	fontPath := fs.String("font", "", "path to a monospace TTF (default: embedded Go Mono)")
 	cellAspect := fs.Float64("cell-aspect", 2.0, "character cell height divided by width")
 	clipLow := fs.Float64("clip-low", 0.02, "lower luminance percentile to clip")
 	clipHigh := fs.Float64("clip-high", 0.98, "upper luminance percentile to clip")
+	gamma := fs.Float64("gamma", 1.0, "midtone gamma; values above 1 brighten")
+	background := fs.String("background", "black", "composite transparency over black, white, or auto")
+	texture := fs.Float64("texture", 0.6, "paint glyph ink strength, 0..1")
+	seed := fs.Int64("seed", 1, "paint texture variation seed")
+	paletteName := fs.String("palette", "none", "curated colours: none, abyss, neon, mono, paper, amber, blueprint, newsprint, terminal")
 	edges := fs.Bool("edges", false, "sharpen with an unsharp mask before matching")
 	localContrast := fs.Bool("local-contrast", false, "apply local contrast normalization")
-	dither := fs.Bool("dither", false, "Floyd-Steinberg dithering in ramp mode")
+	dither := fs.Bool("dither", false, "dither ramp glyphs and paint fills")
 	invert := fs.Bool("invert", false, "invert ink coverage for light-on-dark output")
 	halfblock := fs.Bool("halfblock", false, "use upper half blocks for double vertical resolution")
-	outPath := fs.String("out", "", "write .txt or .png instead of the terminal")
+	outPath := fs.String("out", "", "write .txt, .html, or .png instead of the terminal")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -63,6 +68,11 @@ func run(args []string) error {
 		CellAspect:    *cellAspect,
 		ClipLow:       *clipLow,
 		ClipHigh:      *clipHigh,
+		Gamma:         *gamma,
+		Background:    *background,
+		Texture:       *texture,
+		Seed:          *seed,
+		Palette:       *paletteName,
 		Edges:         *edges,
 		LocalContrast: *localContrast,
 		Dither:        *dither,
@@ -115,8 +125,15 @@ func run(args []string) error {
 		}
 		defer out.Close()
 		return render.WritePNG(out, art, opts.ResolvedFont(), convert.DefaultCellW, convert.DefaultCellH)
+	case ".html":
+		out, err := os.Create(*outPath)
+		if err != nil {
+			return fmt.Errorf("create output: %w", err)
+		}
+		defer out.Close()
+		return render.WriteHTMLDocument(out, art, "asciify — "+filepath.Base(fs.Arg(0)))
 	default:
-		return fmt.Errorf("unsupported output %q: use .txt or .png", *outPath)
+		return fmt.Errorf("unsupported output %q: use .txt, .png, or .html", *outPath)
 	}
 }
 

@@ -45,8 +45,9 @@ func asciifyConvert(_ js.Value, args []js.Value) any {
 		"cols": art.Cols,
 		"rows": art.Rows,
 	}
-	if opts.ColorMode != "none" {
+	if opts.ColorMode != "none" || art.FillMask != nil {
 		result["ansi"] = convert.Terminal(art, opts.ColorMode)
+		result["html"] = convert.HTML(art)
 	}
 	if boolOption(args, "png") {
 		png, err := convert.PNG(art, opts.ResolvedFont())
@@ -83,6 +84,21 @@ func readOptions(v js.Value) convert.Options {
 	}
 	if x := v.Get("clipHigh"); !x.IsUndefined() && !x.IsNull() {
 		opts.ClipHigh = x.Float()
+	}
+	if x := v.Get("gamma"); !x.IsUndefined() && !x.IsNull() {
+		opts.Gamma = x.Float()
+	}
+	if x := v.Get("background"); !x.IsUndefined() && !x.IsNull() {
+		opts.Background = x.String()
+	}
+	if x := v.Get("texture"); !x.IsUndefined() && !x.IsNull() {
+		opts.Texture = x.Float()
+	}
+	if x := v.Get("seed"); !x.IsUndefined() && !x.IsNull() {
+		opts.Seed = int64(x.Int())
+	}
+	if x := v.Get("palette"); !x.IsUndefined() && !x.IsNull() {
+		opts.Palette = x.String()
 	}
 	if x := v.Get("edges"); !x.IsUndefined() && !x.IsNull() {
 		opts.Edges = x.Bool()

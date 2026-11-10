@@ -116,7 +116,7 @@ a {
   min-height: 74px;
   padding: 14px;
   border: 1px dashed var(--line-strong);
-  border-radius: 8px;
+  border-radius: 0;
   color: var(--muted);
   cursor: pointer;
   text-align: center;
@@ -150,10 +150,46 @@ a {
   margin-top: 8px;
 }
 
+.source {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.source img {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border: 1px solid var(--line);
+  object-fit: cover;
+  background: var(--panel-2);
+}
+
+.source-meta {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.source-meta strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-meta span {
+  color: var(--faint);
+}
+
 .chip {
   padding: 4px 9px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: var(--muted);
   font-family: inherit;
@@ -187,7 +223,7 @@ a {
   width: 100%;
   padding: 7px 8px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--panel-2);
   color: var(--ink);
   font-family: inherit;
@@ -200,6 +236,13 @@ a {
 .field select:focus {
   border-color: var(--orange);
   outline: none;
+}
+
+.field input[type="range"] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--orange);
 }
 
 .check {
@@ -224,7 +267,7 @@ a {
 .btn {
   padding: 8px 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 0;
   background: var(--panel-2);
   color: var(--ink);
   font-family: inherit;
@@ -264,7 +307,7 @@ a {
   overflow: auto;
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--output-size, 12px);
   line-height: 1.15;
   white-space: pre;
   tab-size: 4;
